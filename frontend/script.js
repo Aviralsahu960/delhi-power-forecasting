@@ -351,6 +351,38 @@ function updateAlert(data) {
             "alertCountBadge"
         );
 
+    const marginEl =
+        document.getElementById(
+            "sideMargin"
+        );
+
+    if (marginEl) {
+
+        const margin =
+            Math.round(
+                data.nextDayPeak - alertThreshold
+            );
+
+        if (margin >= 0) {
+
+            marginEl.textContent =
+                `+${formatMW(margin)} MW (Alert)`;
+
+            marginEl.style.color =
+                "var(--crimson-alert)";
+
+        } else {
+
+            marginEl.textContent =
+                `${formatMW(margin)} MW (Safe)`;
+
+            marginEl.style.color =
+                "var(--emerald-safe)";
+
+        }
+
+    }
+
     if (!banner || !message || !badge) {
         return;
     }
