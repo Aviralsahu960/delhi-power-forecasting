@@ -18,7 +18,7 @@
 |---|---|
 | **Frontend (Netlify)** | https://powerpulse-delhi.netlify.app/ |
 | **Backend API (Cloudflare Tunnel)** | https://joel-ensemble-treatments-tough.trycloudflare.com/docs |
-| **API Docs (Swagger)** | `<backend URL>/docs` |
+| **API Docs (Swagger)** | https://joel-ensemble-treatments-tough.trycloudflare.com/docs |
 
 > The backend runs on a local machine, exposed via a Cloudflare Tunnel.
 > If the tunnel URL has changed since this README was written, check
