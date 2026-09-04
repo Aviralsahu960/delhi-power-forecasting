@@ -17,7 +17,7 @@
 | What | Link |
 |---|---|
 | **Frontend (Netlify)** | https://powerpulse-delhi.netlify.app/ |
-| **Backend API (Cloudflare Tunnel)** | https://satisfaction-motels-season-air.trycloudflare.com |
+| **Backend API (Cloudflare Tunnel)** | https://joel-ensemble-treatments-tough.trycloudflare.com/docs |
 | **API Docs (Swagger)** | `<backend URL>/docs` |
 
 > The backend runs on a local machine, exposed via a Cloudflare Tunnel.
