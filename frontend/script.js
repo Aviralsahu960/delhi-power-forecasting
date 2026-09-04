@@ -32,7 +32,7 @@ const demoData = {
 
     solarOffset: 1280,
 
-    capacity: 8800,
+    capacity: 35000,
 
     forecast: [
         {
@@ -106,7 +106,7 @@ const demoData = {
 // CONFIGURATION
 // ------------------------------------------------------------
 
-let alertThreshold = 8000;
+let alertThreshold = 29750;
 
 let alertAcknowledged = false;
 
