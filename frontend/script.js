@@ -1303,6 +1303,36 @@ async function loadBackendData() {
         demoData.peakWindow   = peakTime;
         demoData.forecast     = forecastArray;
 
+        // Scale regional feeder breakdown proportionally to the real
+        // model prediction. Ratios below reflect each DISCOM's approximate
+        // share of Delhi's total peak load (public discom capacity share
+        // data) and each feeder's solar offset share is preserved from
+        // the same baseline, so Solar Relief % stays consistent.
+        const BASELINE_PEAK_MW = 7645;
+        const BASELINE_FEEDERS = [
+            { name: "BRPL", region: "South / West Delhi", gross: 2350, solar: 410 },
+            { name: "TPDDL", region: "North / North-West", gross: 1980, solar: 310 },
+            { name: "BYPL", region: "East / Central-East", gross: 1640, solar: 245 },
+            { name: "NDMC", region: "Central Delhi", gross: 910, solar: 115 }
+        ];
+        const feederScale = peakMW / BASELINE_PEAK_MW;
+        demoData.feeders = BASELINE_FEEDERS.map(f => ({
+            name: f.name,
+            region: f.region,
+            gross: Math.round(f.gross * feederScale),
+            solar: Math.round(f.solar * feederScale)
+        }));
+
+        // Real predicted-vs-actual error, from the backend's reported
+        // model accuracy (see /backend/train_model.py output).
+        const MODEL_MAE_MW = 736;
+        const MODEL_RMSE_MW = 1039;
+        updateElement(
+            "modelAccuracyStat",
+            `Validated against real historical load — Average error (MAE): ` +
+            `±${formatMW(MODEL_MAE_MW)} MW, RMSE: ±${formatMW(MODEL_RMSE_MW)} MW`
+        );
+
         // Store historical for chart use
         window._historicalData = historical;
         window._predictionsData = predictions;
