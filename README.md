@@ -16,7 +16,7 @@
 
 | What | Link |
 |---|---|
-| **Frontend (Netlify)** | https://fluffy-profiterole-8cf802.netlify.app |
+| **Frontend (Netlify)** | https://powerpulse-delhi.netlify.app/ |
 | **Backend API (Cloudflare Tunnel)** | https://satisfaction-motels-season-air.trycloudflare.com |
 | **API Docs (Swagger)** | `<backend URL>/docs` |
 
