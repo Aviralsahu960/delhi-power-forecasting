@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GRID ANALYTICS PRO – Delhi Demand Forecast</title>
+  
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- External Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- Top SCADA Telemetry Strip -->
+  <div class="top-scada-bar">
+    <div class="telemetry-group">
+      <div class="telemetry-item">
+        <span class="status-dot"></span>
+        <span>SLDC DELHI CONTROL LINK: <strong>ACTIVE</strong></span>
+      </div>
+      <div class="telemetry-item">
+        <span>GRID FREQUENCY:</span>
+        <span id="gridFrequency" class="live-freq">50.02 Hz</span>
+      </div>
+      <div class="telemetry-item">
+        <span>DISPATCH STATE: <strong style="color: var(--emerald-safe);">OPTIMAL</strong></span>
+      </div>
+    </div>
+    <div class="telemetry-group">
+      <div class="telemetry-item">
+        <span>SYSTEM TIME (IST):</span>
+        <span id="liveTimestamp" style="color: #fff;">2026-09-04 21:00:45 IST</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Header -->
+  <header class="app-header">
+    <div class="header-branding">
+      <div class="logo-icon">⚡</div>
+      <div class="title-box">
+        <h1>DELHI GRID ANALYTICS <span class="badge-delhi">DEMAND FORECAST</span></h1>
+<p>Short-term electricity demand forecasting using historical load + weather data</p>
+</div>
+    </div>
+    <div class="header-actions">
+      <div class="user-badge">
+        <div class="user-avatar">DO</div>
+        <div>
+          <div style="font-weight: 600; color: #fff;">Discom Shift Lead</div>
+          <div style="font-size: 0.7rem; color: var(--text-dim);">SLDC Delhi Ops / BRPL, BYPL, TPDDL</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Dashboard Container -->
+  <div class="dashboard-container">
+
+    <!-- LEFT SIDEBAR: Key KPI Metrics & Forecast Summary -->
+    <aside class="left-sidebar">
+      
+      <!-- Next-Day Demand Prediction Summary Card -->
+      <div class="card kpi-card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            Next-Day Peak Demand
+          </div>
+          <span class="card-badge" id="predictionDate">TOMORROW</span>
+        </div>
+        <div class="kpi-value-container">
+          <div class="kpi-value" id="nextDayPeakMW">7,645 <span class="kpi-unit">MW</span></div>
+          <div class="kpi-subtext">
+            <span>Peak Expected Window:</span>
+            <strong style="color: #fff;" id="peakWindowText">15:30 & 23:15 IST</strong>
+          </div>
+        </div>
+
+        <div style="margin-top: 10px;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 4px;">
+            <span style="color: var(--text-muted);">AI Confidence Interval:</span>
+            <span class="ci-pill" id="ciRangePill">95% CI: 7,420 – 7,870 MW</span>
+          </div>
+          <div style="font-size: 0.7rem; color: var(--text-dim);">
+            Model Error Margin: <strong>±2.9%</strong> (Based on Ensemble Transformer)
+          </div>
+        </div>
+
+        <!-- Rooftop Solar Contribution -->
+        <div class="solar-pill">
+          <div>
+            <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 600;">Rooftop Solar Offset</div>
+            <div style="font-size: 0.68rem; opacity: 0.85;">Peak daytime solar generation</div>
+          </div>
+          <div style="text-align: right; font-family: var(--font-mono); font-weight: 700; font-size: 1.1rem;" id="solarOffsetVal">
+            -1,280 <span style="font-size: 0.75rem;">MW</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Current Capacity & Configurable Threshold -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            Grid Capacity Limit
+          </div>
+          <span class="card-badge" id="capacityPct">95.6% LOAD</span>
+        </div>
+        <div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.82rem; font-family: var(--font-mono);">
+            <span>Installed Safe Capacity:</span>
+            <strong>8,800 MW</strong>
+          </div>
+          <div class="status-meter">
+            <div class="status-meter-bar" id="meterFill"></div>
+          </div>
+        </div>
+
+        <div class="threshold-box">
+          <div class="threshold-label">
+            <span>Configurable Alert Trigger:</span>
+            <strong id="thresholdDisplay" style="color: var(--rose-accent);">7,500 MW</strong>
+          </div>
+          <input type="range" min="6500" max="8500" step="50" value="7500" class="threshold-slider" id="thresholdSlider">
+          <div style="display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--text-dim); margin-top: 4px;">
+            <span>6,500 MW</span>
+            <span>Default: 8,000 MW</span>
+            <span>8,500 MW</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Active Alerts Panel -->
+      <div class="card" style="flex: 1;">
+        <div class="card-header">
+          <div class="card-title" style="color: var(--crimson-alert);">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            Active Grid Alerts
+          </div>
+          <span class="card-badge" id="alertCountBadge" style="background: rgba(239, 68, 68, 0.2); color: #f87171;">1 CRITICAL</span>
+        </div>
+        
+        <div id="alertContainer">
+          <div class="alert-banner" id="primaryAlertBanner">
+            <div class="alert-banner-header">
+              <span>⚠️ CAPACITY EXCEEDANCE WARNING</span>
+            </div>
+            <div class="alert-banner-body" id="alertMessageText">
+              Predicted Next-Day Peak (<strong>7,645 MW</strong>) exceeds current alert threshold (<strong>7,500 MW</strong>). Initiate inter-state banking & thermal peaking units.
+            </div>
+            <button class="btn-ack" id="ackButton" onclick="toggleAlertAck()">
+              ✓ Acknowledge Alert
+            </button>
+          </div>
+        </div>
+
+        <div style="margin-top: 14px; font-size: 0.72rem; color: var(--text-dim);">
+          Alerts remain persistent across shifts until explicitly acknowledged by control room staff.
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="main-content">
+
+      <!-- TOP PANEL: 7-Day Demand & Temperature Forecast Line Chart -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
+              7-Day Demand (MW) & Ambient Temperature (°C) Forecast
+            </div>
+            <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 2px;">
+              Dual Y-Axis: Predicted Electricity Load vs Forecasted Heat Index
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <div class="sim-selector">
+             <button class="sim-btn active" data-scenario="heatwave">Heatwave Peak</button>
+<button class="sim-btn" data-scenario="monsoon">Monsoon Moderate</button>
+<button class="sim-btn" data-scenario="normal">Standard</button>
+ </div>
+          </div>
+        </div>
+        <div class="chart-container-forecast">
+          <canvas id="forecastChart"></canvas>
+        </div>
+      </div>
+
+      <!-- MIDDLE PANELS: Temperature vs Demand & Regional Feeder Breakdown -->
+      <div class="mid-grid">
+        
+        <!-- Temperature vs Demand Correlation Scatter -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/></svg>
+                Temperature vs. Demand Sensitivity
+              </div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">
+                Delhi Cooling Load Elasticity Curve (~180 MW / °C past 32°C)
+              </div>
+            </div>
+          </div>
+          <div class="chart-container-scatter">
+            <canvas id="scatterChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Feeder-Wise Breakdown with Solar Netting -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                Delhi Discom Regional Breakdown
+              </div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">
+                Gross Demand vs Rooftop Solar vs Net Discom Drawl
+              </div>
+            </div>
+            <span class="card-badge">MW BREAKDOWN</span>
+          </div>
+          <div class="chart-container-bar">
+            <canvas id="feederChart"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- BOTTOM PANEL: Feeder Data Table -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+            Feeder Area Operational Summary & Solar Impact
+          </div>
+          <div style="font-size: 0.72rem; color: var(--text-muted);">
+            Net Demand = Gross Demand − Rooftop Solar Injection
+          </div>
+        </div>
+        <div class="table-container">
+          <table class="feeder-table" id="feederDataTable">
+            <thead>
+              <tr>
+                <th>Discom / Feeder Area</th>
+                <th>Coverage Region</th>
+                <th>Gross Peak (MW)</th>
+                <th>Solar Offset (MW)</th>
+                <th>Net Demand (MW)</th>
+                <th>Solar Relief %</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="feederTableBody">
+              <!-- Dynamically Populated by script.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- RIGHT SIDEBAR: Grid Alert Overview & Data Export -->
+    <aside class="right-sidebar">
+      
+      <!-- Grid Alert Status Overview -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            Grid Alert Overview
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: rgba(255,255,255,0.03); border-radius: var(--radius-sm);">
+            <span style="font-size: 0.8rem; color: var(--text-muted);">Threshold Limit:</span>
+            <span style="font-family: var(--font-mono); font-weight: 700; color: #fff;" id="sideThreshold">7,500 MW</span>
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: rgba(255,255,255,0.03); border-radius: var(--radius-sm);">
+            <span style="font-size: 0.8rem; color: var(--text-muted);">Exceedance Margin:</span>
+            <span style="font-family: var(--font-mono); font-weight: 700; color: var(--crimson-alert);" id="sideMargin">+145 MW (Alert)</span>
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: rgba(255,255,255,0.03); border-radius: var(--radius-sm);">
+            <span style="font-size: 0.8rem; color: var(--text-muted);">Spinning Reserves:</span>
+            <span style="font-family: var(--font-mono); font-weight: 700; color: var(--emerald-safe);">1,155 MW Available</span>
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: rgba(255,255,255,0.03); border-radius: var(--radius-sm);">
+            <span style="font-size: 0.8rem; color: var(--text-muted);">Inter-Discom Transfer:</span>
+            <span style="font-family: var(--font-mono); font-weight: 700; color: var(--cyan-accent);">ACTIVE (NR-GRID)</span>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Action Panel & CSV Download -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Data Operations
+          </div>
+        </div>
+        
+        <p style="font-size: 0.76rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 14px;">
+          Export the complete 7-day AI forecast dataset, confidence interval bounds, weather metrics, and regional feeder net adjustments for SLDC reporting.
+        </p>
+
+        <button class="btn-primary" id="downloadCsvBtn" onclick="downloadForecastCSV()">
+          <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Download Forecast (CSV)
+        </button>
+
+        <div style="font-size: 0.7rem; color: var(--text-dim); margin-top: 10px; text-align: center;">
+          Compatible with CEA / CERC SLDC Reporting Standards
+        </div>
+      </div>
+
+      <!-- Model Metadata -->
+      <div class="card" style="flex: 1;">
+        <div class="card-header">
+          <div class="card-title">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Model Architecture
+          </div>
+        </div>
+        <div style="font-size: 0.74rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 8px;">
+           <div><strong>Model Engine:</strong> Backend forecasting model</div>
+<div><strong>Weather Input:</strong> Open-Meteo temperature & humidity</div>
+<div><strong>Load Input:</strong> Historical electricity demand data</div>
+<div><strong>Forecast:</strong> Next-day / next-week demand prediction</div>
+ </div>
+      </div>
+
+    </aside>
+
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div>DELHI GRID ANALYTICS • FRONTEND PROTOTYPE</div>
+<div>Backend-ready • Weather: Open-Meteo • Load: Public datasets / backend</div>
+     </footer>
+
+  <!-- External JavaScript File -->
+  <script src="script.js"></script>
+  <script>
+    /*
+     * =====================================================
+     * BACKEND CONNECTION PLACEHOLDER
+     * =====================================================
+     * When the backend is ready, put its URL here.
+     *
+     * Example:
+     * const BACKEND_URL = "http://127.0.0.1:5000";
+     *
+     * DO NOT connect the backend yet.
+     */
+
+    const BACKEND_URL = "https://satisfaction-motels-season-air.trycloudflare.com";
+</script>
+</body>
+</html>
