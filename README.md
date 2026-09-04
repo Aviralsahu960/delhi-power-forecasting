@@ -1,4 +1,4 @@
-# ⚡ Delhi Electricity Demand Forecasting
+# Delhi Electricity Demand Forecasting
 
 **Team Nexora** — Origin Data Science Club Hackathon (PS-1)
 
@@ -12,7 +12,7 @@
 
 ---
 
-## 🔗 Live Demo
+## Live Demo
 
 | What | Link |
 |---|---|
@@ -20,20 +20,20 @@
 | **Backend API (Cloudflare Tunnel)** | https://satisfaction-motels-season-air.trycloudflare.com |
 | **API Docs (Swagger)** | `<backend URL>/docs` |
 
-> ⚠️ The backend runs on a local machine, exposed via a Cloudflare Tunnel.
+> The backend runs on a local machine, exposed via a Cloudflare Tunnel.
 > If the tunnel URL has changed since this README was written, check
 > `frontend/script.js` (`BACKEND_URL`) for the current one.
 
 ---
 
-## 🧩 Problem Statement — PS1
+## Problem Statement — PS1
 
 Electricity discoms in Delhi need to forecast next-day power demand
 accurately to balance grid load, avoid outages, and plan generation ahead
 of time — especially during temperature-driven demand spikes. Manual or
 static forecasting methods don't react well to real weather changes.
 
-## 💡 Solution
+## Solution
 
 An AI-based system that predicts Delhi's hourly electricity demand for the
 upcoming days using historical load patterns and live weather forecasts,
@@ -42,12 +42,12 @@ capacity — giving discoms an early warning window instead of finding out
 after the fact.
 
 **In one sentence:** an AI system that predicts next-day electricity
-demand using weather + historical load data, with built-in grid capacity
+demand using weather and historical load data, with built-in grid capacity
 alerting.
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 Frontend (Netlify, static HTML/CSS/JS)
@@ -62,52 +62,73 @@ FastAPI Backend (Cloudflare Tunnel)
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Backend:** Python, FastAPI, uvicorn
 - **ML:** scikit-learn (RandomForestRegressor), pandas, numpy
 - **Weather Data:** Open-Meteo API (forecast + historical)
 - **Frontend:** HTML, CSS, JavaScript, Chart.js (SCADA-style dark theme)
 - **Hosting:** Netlify (frontend), Cloudflare Tunnel (backend)
-- **Dataset:** 24-hours Delhi Power Consumption dataset
+- **Dataset:** Synthetic hourly Delhi power consumption dataset (see
+  Dataset Note below)
 
 ---
 
-## 📊 Model
+## Dataset Note
+
+This project is trained on a realistic, weather-correlated synthetic
+Delhi load dataset — 8,738 hourly records spanning a full year (January
+2023 onward) — since granular discom/feeder-level historical load data
+isn't publicly released at hourly resolution. The dataset reflects real
+seasonal and diurnal demand patterns: temperature-driven peaks, weekday
+versus weekend variation, holiday effects, and solar generation offset.
+
+As a result, absolute load values in this demo (roughly 12,000–31,000 MW)
+represent the dataset's own realistic scale rather than a literal match to
+Delhi's current published record peak (approximately 8,656 MW). The
+forecasting methodology, feature engineering, and alert logic are built to
+generalize directly to real discom load data if it were supplied in place
+of this dataset.
+
+---
+
+## Model
 
 - **Algorithm:** RandomForestRegressor
 - **Features:** `temperature, hour, dayofweek, is_weekend, month, load_lag24`
-- **Load range in data:** 12,023 – 31,138 MW (real Delhi scale)
-- **Performance:** MAE ≈ 736 MW, RMSE ≈ 1039 MW
-- **Validation:** time-based train/test split (`shuffle=False`) — the model
-  is trained on the earlier portion of the timeline and tested on the
-  later portion, avoiding lookahead leakage that a random split would
+- **Load range in data:** 12,023 – 31,138 MW (dataset scale — see Dataset
+  Note above)
+- **Performance:** MAE approximately 736 MW, RMSE approximately 1039 MW
+- **Validation:** time-based train/test split (`shuffle=False`) — the
+  model is trained on the earlier portion of the timeline and tested on
+  the later portion, avoiding lookahead leakage that a random split would
   introduce in time-series data.
 
-## 🚨 Alert Logic
+## Alert Logic
 
-Grid capacity reference: **35,000 MW**
+Grid capacity reference: **35,000 MW** (scaled to this dataset's realistic
+load range — see Dataset Note above)
 
 | Predicted Load | Status |
 |---|---|
-| ≥ 95% of capacity | 🔴 `CRITICAL` |
-| ≥ 85% of capacity | 🟡 `WARNING` |
-| below 85% | 🟢 `Normal` |
+| ≥ 95% of capacity | `CRITICAL` |
+| ≥ 85% of capacity | `WARNING` |
+| below 85% | `Normal` |
 
 ---
 
-## 📡 API Endpoints
+## API Endpoints
 
 | Method | Endpoint | Description |
 |---|---|---|
 | `GET` | `/health` | Health check — `{"status": "ok"}` |
 | `GET` | `/historical?hours=168` | Last N hours of actual historical load |
 | `GET` | `/predict?days=7` | Hourly forecasted load + alert status for the next N days |
-| `GET` | `/current-weather` | Live Delhi temperature & humidity (Open-Meteo) |
+| `GET` | `/current-weather` | Live Delhi temperature and humidity (Open-Meteo) |
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 Origin-DATA-Science/
@@ -120,7 +141,7 @@ Origin-DATA-Science/
 │   └── requirements.txt
 ├── dataset/
 │   └── archive/
-│       └── 24-hours Delhi Power Consumption dataset.csv
+│       └── delhi_power_consumption_dataset.csv
 ├── frontend/
 │   ├── index.html          # SCADA-style dashboard
 │   ├── style.css
@@ -128,13 +149,13 @@ Origin-DATA-Science/
 └── README.md
 ```
 
-> **Note:** `model.pkl` (~61MB) and the dataset CSVs are excluded from this
-> repository due to GitHub's file size limits. See **Running Locally**
+> `model.pkl` (approximately 61MB) and the dataset CSVs are excluded from
+> this repository due to GitHub's file size limits. See **Running Locally**
 > below to regenerate them.
 
 ---
 
-## 🚀 Running Locally
+## Running Locally
 
 ```bash
 # 1. Clone the repo
@@ -146,8 +167,8 @@ cd backend
 pip install -r requirements.txt
 
 # 3. Place the dataset
-# Download/copy "24-hours Delhi Power Consumption dataset.csv" into
-# ../dataset/archive/ (not included in repo due to size)
+# Copy the Delhi power consumption dataset CSV into ../dataset/archive/
+# (not included in repo due to size)
 
 # 4. Train the model (regenerates model.pkl, not included in repo)
 python train_model.py
@@ -168,7 +189,7 @@ cloudflared tunnel --url http://localhost:8000
 
 ---
 
-## 🎯 Impact
+## Impact
 
 - Early warning for discoms before grid load approaches critical capacity
 - Reduces reactive load-shedding by enabling proactive planning
