@@ -35,7 +35,7 @@ def load_real_data(csv_path: str = None) -> pd.DataFrame:
     # ── Normalize timestamp column ──
     for col in ["timestamp", "datetime", "date", "time"]:
         if col in df.columns:
-            df["timestamp"] = pd.to_datetime(df[col])
+            df["timestamp"] = pd.to_datetime(df[col], format="%d-%m-%Y %H:%M")
             break
 
     # ── Normalize load column to load_MW ──
